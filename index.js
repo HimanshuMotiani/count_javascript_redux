@@ -1,67 +1,45 @@
-let h2 = document.querySelector('h2');
+let store = Redux.createStore(reducer);
+
+let counter = store.getState();
+
+let h2 = document.querySelector('.counter');
 let increment = document.querySelector('.increment');
 let decrement = document.querySelector('.decrement');
 let reset = document.querySelector('.reset');
 
-let store = createStore(reducer)
-counter = store.getState() && store.getState().value ? store.getState().value : 0;
+increment.addEventListener("click", () => {
+  store.dispatch({ type: "increment" });
+})
+decrement.addEventListener("click", () => {
+  store.dispatch({ type: "decrement" })
+})
+reset.addEventListener("click", () => {
+  store.dispatch({ type: "reset" })
+})
 
-h2.innerText = counter;
+store.subscribe( () => {
+  counter = store.getState();
+  h2.innerText = counter;
+})
 
-increment.addEventListener('click', () => {
-    store.dispatch('increment');
-  });
-  
-  decrement.addEventListener('click', () => {
-    store.dispatch('decrement');
-  });
-  
-  reset.addEventListener('click', () => {
-    store.dispatch('reset');
-  });
 
-  store.subscribe(() => {
-    counter = store.getState().value;
-    h2.innerText = counter;
-  });
-
-function createStore(reducer) {
-    let state;
-    let listeners = [];
-    const getState = () => state;
-    const dispatch = (action) => {
-      state = reducer(state, action);
-      listeners.forEach((listener) => listener());
-    };
-  
-    const subscribe = (listener) => {
-      listeners.push(listener);
-      return () => {
-        listeners.filter((l) => l !== listeners);
-      };
-    };
-    dispatch({});
-    return { getState, dispatch, subscribe };
+function reducer(state = 0, action) {
+  switch (action.type) {
+    case 'increment':
+      return state + (action.step || 1);
+      break;
+    case 'decrement':
+      if(state > 0 ) {
+        return state - (action.step || 1);
+      } else {
+        return 0;
+      }
+      break;
+    case 'reset':
+      return 0;
+      break;
+    default:
+      return state;
+      break;
   }
-
-  function reducer(state = { value: 0, step: 5 }, action) {
-    switch (action) {
-      case 'increment':
-        return { ...state, value: state.value + state.step };
-  
-      case 'decrement':
-        return { ...state, value: state.value - state.step };
-  
-      case 'reset':
-        return { ...state, value: 0 };
-  
-      case 'incrementByFive':
-        return { ...state, step: 5 };
-  
-      case 'incrementByTen':
-        return { ...state, step: 10 };
-  
-      case 'incrementByFifteen':
-        return { ...state, step: 15 };
-    }
-  }
+}
